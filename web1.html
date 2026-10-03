@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hệ Thống Nộp Bài Tập Lớp Học</title>
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --bg-color: #f8fafc;
+            --card-bg: #ffffff;
+            --text-color: #1e293b;
+            --border-color: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            color: var(--primary-color);
+            font-size: 2.2rem;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 25px;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            height: fit-content;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            color: #0f172a;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"], select, input[type="file"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, select:focus {
+            border-color: var(--primary-color);
+        }
+
+        input[type="file"] {
+            background: #f1f5f9;
+            cursor: pointer;
+        }
+
+        .submit-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Phần hiển thị danh sách bài nộp */
+        .filter-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            align-items: center;
+        }
+
+        .filter-container select {
+            flex: 1;
+        }
+
+        .homework-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+            max-height: 600px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .homework-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .homework-card img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            border-bottom: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .homework-card img:hover {
+            opacity: 0.9;
+        }
+
+        .homework-info {
+            padding: 12px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .homework-info h4 {
+            font-size: 1rem;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .homework-info p {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 2px;
+        }
+
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 6px;
+            font-size: 0.8rem;
+            border-radius: 6px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 8px;
+            transition: background 0.2s;
+        }
+
+        .delete-btn:hover {
+            background: #dc2626;
+        }
+
+        /* Modal phóng to hình ảnh */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal img {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 8px;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Nộp Bài Tập Trực Tuyến</h1>
+            <p>Tải hình ảnh bài làm của bạn lên để giáo viên và các bạn cùng theo dõi</p>
+        </header>
+
+        <div class="main-grid">
+            <!-- Cột bên trái: Form nộp bài -->
+            <div class="card">
+                <h2>Gửi Bài Làm Mới</h2>
+                <div class="form-group">
+                    <label for="studentName">Họ và tên học sinh:</label>
+                    <input type="text" id="studentName" placeholder="Nhập họ tên của bạn...">
+                </div>
+
+                <div class="form-group">
+                    <label for="subjectSelect">Môn học:</label>
+                    <select id="subjectSelect">
+                        <option value="Toán">Toán</option>
+                        <option value="Hóa Học">Hóa Học</option>
+                        <option value="Sinh Học">Sinh Học</option>
+                        <option value="Tiếng Anh">Tiếng Anh</option>
+                        <option value="Môn Khác">Môn Khác</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="homeworkFile">Chọn hình ảnh bài tập:</label>
+                    <input type="file" id="homeworkFile" accept="image/*">
+                </div>
+
+                <button class="submit-btn" onclick="submitHomework()">Nộp Bài Ngay</button>
+            </div>
+
+            <!-- Cột bên phải: Danh sách bài đã nộp -->
+            <div class="card">
+                <h2>Danh Sách Bài Đã Nộp</h2>
+                
+                <div class="filter-container">
+                    <label for="filterSubject" style="margin: 0; font-size: 0.9rem;">Lọc:</label>
+                    <select id="filterSubject" onchange="renderHomeworks()">
+                        <option value="Tất cả">Tất cả môn học</option>
+                        <option value="Toán">Toán</option>
+                        <option value="Hóa Học">Hóa Học</option>
+                        <option value="Sinh Học">Sinh Học</option>
+                        <option value="Tiếng Anh">Tiếng Anh</option>
+                        <option value="Môn Khác">Môn Khác</option>
+                    </select>
+                </div>
+
+                <div class="homework-grid" id="homeworkGrid">
+                    <!-- Danh sách bài tập hiển thị ở đây -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal xem ảnh lớn -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <span class="modal-close">&times;</span>
+        <img id="modalImg" src="" alt="Phóng to bài tập">
+    </div>
+
+    <script>
+        // Nộp bài tập
+        function submitHomework() {
+            const name = document.getElementById('studentName').value.trim();
+            const subject = document.getElementById('subjectSelect').value;
+            const fileInput = document.getElementById('homeworkFile');
+
+            if (!name) {
+                alert('Vui lòng nhập họ và tên của bạn!');
+                return;
+            }
+
+            if (fileInput.files.length === 0) {
+                alert('Vui lòng chọn hình ảnh bài tập!');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                const imageDataUrl = e.target.result;
+                let homeworks = JSON.parse(localStorage.getItem('class_homeworks')) || [];
+
+                // Tạo đối tượng bài tập mới
+                const newHomework = {
+                    id: Date.now(),
+                    name: name,
+                    subject: subject,
+                    image: imageDataUrl,
+                    time: new Date().toLocaleString('vi-VN')
+                };
+
+                homeworks.unshift(newHomework); // Đưa bài mới lên đầu
+                localStorage.setItem('class_homeworks', JSON.stringify(homeworks));
+
+                alert('Nộp bài thành công!');
+                
+                // Reset form
+                document.getElementById('studentName').value = '';
+                fileInput.value = '';
+                renderHomeworks();
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        // Hiển thị danh sách bài tập kèm theo lọc môn
+        function renderHomeworks() {
+            const homeworks = JSON.parse(localStorage.getItem('class_homeworks')) || [];
+            const filter = document.getElementById('filterSubject').value;
+            const grid = document.getElementById('homeworkGrid');
+
+            grid.innerHTML = '';
+
+            const filteredList = filter === 'Tất cả' 
+                ? homeworks 
+                : homeworks.filter(hw => hw.subject === filter);
+
+            if (filteredList.length === 0) {
+                grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #64748b; padding: 20px;">Chưa có bài tập nào được nộp.</p>`;
+                return;
+            }
+
+            filteredList.forEach(hw => {
+                const card = `
+                    <div class="homework-card">
+                        <img src="${hw.image}" alt="Bài của ${hw.name}" onclick="openModal('${hw.image}')" title="Nhấn để phóng to ảnh">
+                        <div class="homework-info">
+                            <div>
+                                <h4>${hw.name}</h4>
+                                <p><b>Môn:</b> ${hw.subject}</p>
+                                <p><b>Lúc:</b> ${hw.time}</p>
+                            </div>
+                            <button class="delete-btn" onclick="deleteHomework(${hw.id})">Xóa bài</button>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += card;
+            });
+        }
+
+        // Xóa bài tập theo ID
+        function deleteHomework(id) {
+            if (confirm('Bạn có chắc chắn muốn xóa bài tập này không?')) {
+                let homeworks = JSON.parse(localStorage.getItem('class_homeworks')) || [];
+                homeworks = homeworks.filter(hw => hw.id !== id);
+                localStorage.setItem('class_homeworks', JSON.stringify(homeworks));
+                renderHomeworks();
+            }
+        }
+
+        // Phóng to ảnh khi click vào
+        function openModal(imgSrc) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImg');
+            modal.style.display = 'flex';
+            modalImg.src = imgSrc;
+        }
+
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+
+        // Tải danh sách khi khởi động trang
+        renderHomeworks();
+    </script>
+</body>
+</html>
